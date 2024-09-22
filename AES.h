@@ -1,14 +1,22 @@
 
 class AES{
 	public:
-		static void encrypt();
 
-		// one uses table lookup
-		static void byteSub(unsigned char[]);
-
-		// second bytesub that will perform calculation in GF(2^8) instead of table lookup
+        // takes array 16 bytes of plain text / (text in hexadecimal)
+        // takes a second array of same type, empty --> for result
+		static void encrypt(unsigned char[] A, unsigned char[] Y);
 
 	private:
+
+        // one uses table lookup
+        static void byteSub(unsigned char A);
+
+        // second bytesub that will perform calculation in GF(2^8) instead of table lookup
+
+
+        // perform row shift
+        // takes all 16 bytes at one 
+        static void shiftRow(unsigned char[] B);
 
 };
 
