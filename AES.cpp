@@ -65,3 +65,22 @@ void AES::shiftRow(unsigned char[] B){
 		}
 	}
 }
+
+// Mix column layer
+// takes all 16 bytes
+void AES::mixCol(unsigned char[] B){
+	unsigned char[4][4] temp;
+
+	// multiply row with MIXCOL matrix
+	for(int i = 0; i < 16; i+=4){
+		for(int j = i; j < i+4; j++){
+
+		}
+	}
+
+}
+
+
+// CHECK:
+// Mix col table look up?
+// Implement GF calc? 

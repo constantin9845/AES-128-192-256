@@ -8,15 +8,20 @@ class AES{
 
 	private:
 
-        // one uses table lookup
+        // uses table lookup
+        // takes one byte
         static void byteSub(unsigned char A);
 
         // second bytesub that will perform calculation in GF(2^8) instead of table lookup
 
 
         // perform row shift
-        // takes all 16 bytes at one 
+        // takes all 16 bytes at once 
         static void shiftRow(unsigned char[] B);
+
+        // Mix column layer
+        // takes all 16 bytes at once 
+        static void mixCol(unsigned char[] B);
 
 };
 
@@ -90,6 +95,13 @@ const unsigned char INV_SBOX [16][16] = {
     {0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63,
      0x55, 0x21, 0x0c, 0x7d}
 };
+
+const unsigned char MIXCOL_MATRIX [4][4] = {
+    {0x02, 0x03, 0x01, 0x01},
+    {0x01, 0x02, 0x03, 0x01},
+    {0x01, 0x01, 0x02, 0x03},
+    {0x03, 0x01, 0x01, 0x02}
+}
 
 
 
