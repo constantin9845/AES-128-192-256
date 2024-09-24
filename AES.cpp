@@ -83,4 +83,15 @@ void AES::mixCol(unsigned char[] B){
 
 // CHECK:
 // Mix col table look up?
-// Implement GF calc? 
+// Implement GF calc?
+
+// CALC
+/*
+	A * C = 1 mod p(x)
+
+	A * C when C = 0x01 = A
+	A * C when C = 0x02 = one degree higher : x
+	A * C when C = 0x03 = *(x+1)
+
+
+*/ 
