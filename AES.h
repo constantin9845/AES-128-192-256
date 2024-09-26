@@ -1,27 +1,32 @@
-
 class AES{
 	public:
 
         // takes array 16 bytes of plain text / (text in hexadecimal)
         // takes a second array of same type, empty --> for result
-		static void encrypt(unsigned char[] A, unsigned char[] Y);
+		static void encrypt(unsigned char A[], unsigned char Y[]);
 
 	private:
 
         // uses table lookup
         // takes one byte
-        static void byteSub(unsigned char A);
+        static unsigned char byteSub(unsigned char A);
 
         // second bytesub that will perform calculation in GF(2^8) instead of table lookup
 
 
         // perform row shift
         // takes all 16 bytes at once 
-        static void shiftRow(unsigned char[] B);
+        static void shiftRow(unsigned char B[]);
 
         // Mix column layer
         // takes all 16 bytes at once 
-        static void mixCol(unsigned char[] B);
+        static void mixCol(unsigned char B[]);
+
+        // multiplying by 0x02 in mixCOl
+        //static unsigned char gm2(unsigned char a);
+
+        // multiplying by 0x03 in mixCOl
+        //static unsigned char gm3(unsigned char a);
 
 };
 
@@ -101,7 +106,7 @@ const unsigned char MIXCOL_MATRIX [4][4] = {
     {0x01, 0x02, 0x03, 0x01},
     {0x01, 0x01, 0x02, 0x03},
     {0x03, 0x01, 0x01, 0x02}
-}
+};
 
 
 

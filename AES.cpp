@@ -1,6 +1,6 @@
+#include "AES.h"
 
-
-void AES::byteSub(unsigned char A){
+unsigned char AES::byteSub(unsigned char A){
 	// we get a byte as 2 hex chars as input 
 	// these 2 chars are x,y in S Box table
 	// use to set B (from table)
@@ -15,8 +15,8 @@ void AES::byteSub(unsigned char A){
 }
 
 
-void AES::shiftRow(unsigned char[] B){
-	unsigned char[4][4] temp;
+void AES::shiftRow(unsigned char B[]){
+	unsigned char temp[4][4];
 
 	int index = 0;
 	// fill matrix
@@ -60,7 +60,7 @@ void AES::shiftRow(unsigned char[] B){
 	index = 0;
 	for(int i = 0; i < 4; i++){
 		for(int j = 0; j < 4; j++){
-			B[index] = temp[j][i] 
+			B[index] = temp[j][i]; 
 			index++;
 		}
 	}
@@ -68,25 +68,35 @@ void AES::shiftRow(unsigned char[] B){
 
 // Mix column layer
 // takes all 16 bytes
-void AES::mixCol(unsigned char[] B){
-	unsigned char[4][4] temp;
+void AES::mixCol(unsigned char B[]){
+	unsigned char temp[4][4];
 
 	// multiply row with MIXCOL matrix
-	for(int i = 0; i < 16; i+=4){
-		for(int j = i; j < i+4; j++){
 
-		}
+}
+
+void AES::encrypt(unsigned char A[], unsigned char Y[]){
+
+	// start with bytesub layer
+	// call bytesub function for each byte
+	for(int i = 0; i < 16; i++){
+		Y[i] = byteSub(A[i]);
 	}
 
+	// Mix column layer
+	// all 16 bytes are passed
+	shiftRow(Y);
 }
 
 
 // CHECK:
-// Mix col table look up?
-// Implement GF calc?
+// Implement GF calc
 
 // CALC
-/*
+/*	
+	p(x) = 0x1B
+	if MSB set during multiplication by 2 --> mod p(x)
+
 	A * C = 1 mod p(x)
 
 	A * C when C = 0x01 = A
