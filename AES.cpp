@@ -14,7 +14,6 @@ unsigned char AES::byteSub(unsigned char A){
 	return SBOX[A/16][A%16];
 }
 
-
 void AES::shiftRow(unsigned char B[]){
 	unsigned char temp[4][4];
 
@@ -60,7 +59,7 @@ void AES::shiftRow(unsigned char B[]){
 	index = 0;
 	for(int i = 0; i < 4; i++){
 		for(int j = 0; j < 4; j++){
-			B[index] = temp[j][i]; 
+			B[index] = temp[i][j]; 
 			index++;
 		}
 	}
@@ -91,7 +90,6 @@ void AES::mixCol(unsigned char B[]){
 		B[i] = c0; B[i+1] = c1; B[i+2] = c2; B[i+3] = c3;
 	}
 }
-
 
 unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 

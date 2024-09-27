@@ -8,15 +8,15 @@ int main(){
 
 	unsigned char Y[16];
 
-
-	AES::encrypt(A,Y);
-
 	std::cout<<std::endl;
 	for(int i = 0; i < 16; i++){
 		if(i%4==0){std::cout<<"\n";}
-		std::cout<<(int)Y[i]<<" ";
+		std::cout<<std::hex<<(int)A[i]<<" ";
 	}
 	std::cout<<"\n";
+
+
+	AES::encrypt(A,Y);
 
 
 	std::cout<<std::endl;
