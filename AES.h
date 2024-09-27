@@ -22,11 +22,8 @@ class AES{
         // takes all 16 bytes at once 
         static void mixCol(unsigned char B[]);
 
-        // multiplying by 0x02 in mixCOl
-        //static unsigned char gm2(unsigned char a);
-
-        // multiplying by 0x03 in mixCOl
-        //static unsigned char gm3(unsigned char a);
+        // perform galois multiplication
+        static unsigned char GFmultiply(unsigned char b, unsigned char temp);
 
 };
 

@@ -14,9 +14,27 @@ int main(){
 	std::cout<<std::endl;
 	for(int i = 0; i < 16; i++){
 		if(i%4==0){std::cout<<"\n";}
+		std::cout<<(int)Y[i]<<" ";
+	}
+	std::cout<<"\n";
+
+
+	std::cout<<std::endl;
+	for(int i = 0; i < 16; i++){
+		if(i%4==0){std::cout<<"\n";}
 		std::cout<<std::hex<<(int)Y[i]<<" ";
 	}
 	std::cout<<"\n";
 
 	return 0;
 }
+
+
+/*
+0x5F, 0x72, 0x64, 0x45,
+0x6D, 0x63, 0x6E, 0xB1,
+0xC7, 0x2B, 0xF1, 0x0A,
+0xE7, 0x7F, 0x1A, 0xC0
+
+
+*/

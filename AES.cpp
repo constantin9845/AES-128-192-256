@@ -69,10 +69,63 @@ void AES::shiftRow(unsigned char B[]){
 // Mix column layer
 // takes all 16 bytes
 void AES::mixCol(unsigned char B[]){
-	unsigned char temp[4][4];
+	unsigned char temp[16];
 
-	// multiply row with MIXCOL matrix
+	int tempIndex = 0;
+	// Each 4 bytes are a column
+	for(int i = 0; i < 16; i+=4){
+		
+		unsigned char c0 = GFmultiply(B[i],MIXCOL_MATRIX[0][0]) ^ GFmultiply(B[i+1],MIXCOL_MATRIX[0][1]) ^ 
+		GFmultiply(B[i+2],MIXCOL_MATRIX[0][2]) ^ GFmultiply(B[i+3],MIXCOL_MATRIX[0][3]);
 
+		unsigned char c1 = GFmultiply(B[i],MIXCOL_MATRIX[1][0]) ^ GFmultiply(B[i+1],MIXCOL_MATRIX[1][1]) ^ 
+		GFmultiply(B[i+2],MIXCOL_MATRIX[1][2]) ^ GFmultiply(B[i+3],MIXCOL_MATRIX[1][3]);
+
+		unsigned char c2 = GFmultiply(B[i],MIXCOL_MATRIX[2][0]) ^ GFmultiply(B[i+1],MIXCOL_MATRIX[2][1]) ^ 
+		GFmultiply(B[i+2],MIXCOL_MATRIX[2][2]) ^ GFmultiply(B[i+3],MIXCOL_MATRIX[2][3]);
+
+		unsigned char c3 = GFmultiply(B[i],MIXCOL_MATRIX[3][0]) ^ GFmultiply(B[i+1],MIXCOL_MATRIX[3][1]) ^ 
+		GFmultiply(B[i+2],MIXCOL_MATRIX[3][2]) ^ GFmultiply(B[i+3],MIXCOL_MATRIX[3][3]);
+
+
+		B[i] = c0; B[i+1] = c1; B[i+2] = c2; B[i+3] = c3;
+	}
+}
+
+
+unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
+
+	if(temp == 0x01){
+		return b;
+	}
+
+	// b is reduced by p(x) only if MSB was set
+	else if(temp == 0x02){
+		unsigned char shifted = b<<1;
+
+		// if MSB was set --> need to reduce in GF
+		if(b & 0x80){
+			return shifted ^ 0x1B;
+		}
+		//MSB was 0
+		else{
+			return shifted;
+		}
+
+	}
+	else if(temp == 0x03){
+		unsigned char shifted = b<<1;
+
+		if(b & 0x80){
+			shifted ^= 0x1B;
+		}
+
+		return shifted ^ b;
+		
+	}
+	else{
+		return 0x00;
+	}
 }
 
 void AES::encrypt(unsigned char A[], unsigned char Y[]){
@@ -83,9 +136,13 @@ void AES::encrypt(unsigned char A[], unsigned char Y[]){
 		Y[i] = byteSub(A[i]);
 	}
 
-	// Mix column layer
+	// Shift row layer
 	// all 16 bytes are passed
 	shiftRow(Y);
+
+	// Mix column layer
+	// all 16 bytes passed
+	mixCol(Y);
 }
 
 
@@ -105,3 +162,8 @@ void AES::encrypt(unsigned char A[], unsigned char Y[]){
 
 
 */ 
+
+
+
+
+
