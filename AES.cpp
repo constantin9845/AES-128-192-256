@@ -1,19 +1,11 @@
 #include "AES.h"
 
+// byte substitution layer
 unsigned char AES::byteSub(unsigned char A){
-	// we get a byte as 2 hex chars as input 
-	// these 2 chars are x,y in S Box table
-	// use to set B (from table)
-
-	/*
-		std::cout<< ((B >> 4) & 0x0F) <<std::endl; first
-		std::cout<< (B & 0x0F) <<std::endl; last
-
-	*/
-
 	return SBOX[A/16][A%16];
 }
 
+// shift row layer
 void AES::shiftRow(unsigned char B[]){
 	unsigned char temp[4][4];
 
@@ -26,9 +18,9 @@ void AES::shiftRow(unsigned char B[]){
 		}
 	}
 
-	//shift rows
+	//start shift rows
 
-	// row 2 shift right 3
+	// row 2 shifted right by 3
 	for(int i = 0; i < 3; i++){
 		unsigned char k = temp[1][3];
 		for(int j = 3; j >= 0; j--){
@@ -37,7 +29,7 @@ void AES::shiftRow(unsigned char B[]){
 		temp[1][0] = k;
 	}
 
-	// row 3 shift right 2
+	// row 3 shifted right by 2
 	for(int i = 0; i < 2; i++){
 		unsigned char k = temp[2][3];
 		for(int j = 3; j >= 0; j--){
@@ -47,7 +39,7 @@ void AES::shiftRow(unsigned char B[]){
 	}
 
 
-	// row 4 shift right 1
+	// row 4 shifted right by 1
 	unsigned char k = temp[3][3];
 	for(int j = 3; j >= 0; j--){
 		temp[3][j] = temp[3][j-1];
@@ -66,11 +58,9 @@ void AES::shiftRow(unsigned char B[]){
 }
 
 // Mix column layer
-// takes all 16 bytes
 void AES::mixCol(unsigned char B[]){
 	unsigned char temp[16];
 
-	int tempIndex = 0;
 	// Each 4 bytes are a column
 	for(int i = 0; i < 16; i+=4){
 		
@@ -87,18 +77,63 @@ void AES::mixCol(unsigned char B[]){
 		GFmultiply(B[i+2],MIXCOL_MATRIX[3][2]) ^ GFmultiply(B[i+3],MIXCOL_MATRIX[3][3]);
 
 
-		B[i] = c0; B[i+1] = c1; B[i+2] = c2; B[i+3] = c3;
+		temp[i] = c0; temp[i+1] = c1; temp[i+2] = c2; temp[i+3] = c3;
+	}
+
+	// store result back into B
+	for(int i = 0; i < 16; i++){
+		B[i] = temp[i];
 	}
 }
 
+// Key addition layer
+void AES::applyKey(unsigned char C[], unsigned char K[]){
+
+	for(int i = 0; i < 16; i++){
+		C[i] = C[i]^K[i];
+	}
+}
+
+
+//128 Key scheduler
+unsigned char* AES::genKey(unsigned char K[]){
+
+	// Each element in W must be 32 bits, unsigned char too small
+	//unsigned char W[44];
+	//unsigned char* w = W;
+
+	// load key into first 4 of W
+
+
+	// left most word for each round key
+	for(int i = 1; i <= 10; i++){
+		W[4*i] = W[4*(i-1)] + g(W[(4*i)-1]);
+	}
+
+	// other 3 words for each round key
+	for(int i = 1; i <= 10; i++){
+		for(int j = 1; j <= 3; j++){
+			W[(4*i)+j] = W[(4*i)+j-1] + W[4*(i-1)+j];
+		}
+	}
+
+
+	//return w;
+
+}
+
+// Galois field multiplication for Mix col funcion
 unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 
+	// multiplying by 1 --> no change
 	if(temp == 0x01){
 		return b;
 	}
 
-	// b is reduced by p(x) only if MSB was set
+	// multiply by 2
+	// 2 = x --> left shift by 1
 	else if(temp == 0x02){
+		// perform shift
 		unsigned char shifted = b<<1;
 
 		// if MSB was set --> need to reduce in GF
@@ -111,16 +146,23 @@ unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 		}
 
 	}
+
+	// multiply by 3
+	// 3 = x+1 --> left shift by 1 and XOR(add) to initial value
 	else if(temp == 0x03){
+		// perform shift
 		unsigned char shifted = b<<1;
 
+		// if MSB was set --> need to reduce in GF
 		if(b & 0x80){
 			shifted ^= 0x1B;
 		}
 
+		// XOR(add) to initial value 
 		return shifted ^ b;
 		
 	}
+
 	else{
 		return 0x00;
 	}
@@ -143,23 +185,6 @@ void AES::encrypt(unsigned char A[], unsigned char Y[]){
 	mixCol(Y);
 }
 
-
-// CHECK:
-// Implement GF calc
-
-// CALC
-/*	
-	p(x) = 0x1B
-	if MSB set during multiplication by 2 --> mod p(x)
-
-	A * C = 1 mod p(x)
-
-	A * C when C = 0x01 = A
-	A * C when C = 0x02 = one degree higher : x
-	A * C when C = 0x03 = *(x+1)
-
-
-*/ 
 
 
 

@@ -2,32 +2,58 @@ class AES{
 	public:
 
         // takes array 16 bytes of plain text / (text in hexadecimal)
-        // takes a second array of same type, empty --> for result
+        // takes a second array of same size, empty --> for result
 		static void encrypt(unsigned char A[], unsigned char Y[]);
 
 	private:
 
-        // uses table lookup
-        // takes one byte
+        /*
+            Layer 1
+            perform byte substitution by table lookup
+            takes one byte
+        */
         static unsigned char byteSub(unsigned char A);
 
         // second bytesub that will perform calculation in GF(2^8) instead of table lookup
+        // TO DO
 
-
-        // perform row shift
-        // takes all 16 bytes at once 
+        /*
+            Layer 2
+            perform row shift 
+            takes all 16 bytes at once
+        */
         static void shiftRow(unsigned char B[]);
 
-        // Mix column layer
-        // takes all 16 bytes at once 
+ 
+        /*
+            Layer 3
+            perform Mix column 
+            takes all 16 bytes at once
+        */
         static void mixCol(unsigned char B[]);
 
+
+        /*
+            Key addition layer
+            XOR(add) data to key
+        */
+        static void applyKey(unsigned char C[], unsigned char K[]);
+
+
+        /*
+            128 Key scheduler
+            Generates key 
+        */
+        static unsigned char* genKey(unsigned char K[]);
+
         // perform galois multiplication
+        // In Mix colunm function
         static unsigned char GFmultiply(unsigned char b, unsigned char temp);
 
 };
 
 
+// Byte substitution table
 const unsigned char SBOX[16][16] = {
 	{0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b,
      0xfe, 0xd7, 0xab, 0x76},
@@ -63,6 +89,7 @@ const unsigned char SBOX[16][16] = {
      0xb0, 0x54, 0xbb, 0x16}
 };
 
+// Inverse byte substitution table
 const unsigned char INV_SBOX [16][16] = {
 	{0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e,
      0x81, 0xf3, 0xd7, 0xfb},
@@ -98,6 +125,7 @@ const unsigned char INV_SBOX [16][16] = {
      0x55, 0x21, 0x0c, 0x7d}
 };
 
+// Constant matrix for Mix column function
 const unsigned char MIXCOL_MATRIX [4][4] = {
     {0x02, 0x03, 0x01, 0x01},
     {0x01, 0x02, 0x03, 0x01},
