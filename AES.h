@@ -1,9 +1,12 @@
+#include <iostream>
+#include <bitset>
+
 class AES{
 	public:
 
         // takes array 16 bytes of plain text / (text in hexadecimal)
         // takes a second array of same size, empty --> for result
-		static void encrypt(unsigned char A[], unsigned char Y[]);
+		static void encrypt(unsigned char A[], unsigned char Y[], unsigned char KEY[]);
 
 	private:
 
@@ -44,7 +47,17 @@ class AES{
             128 Key scheduler
             Generates key 
         */
-        static unsigned char* genKey(unsigned char K[]);
+        static unsigned int* genKey(unsigned char K[]);
+
+        /*
+            function removes symmetry from round keys
+            takes in one word (round key) 
+            performs:
+                - 1 left rotation
+                - S-box substitution
+                - add round coefficient (only left most byte)
+        */
+        static unsigned int g(unsigned int w, unsigned int& gConst);
 
         // perform galois multiplication
         // In Mix colunm function

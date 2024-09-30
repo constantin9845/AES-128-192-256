@@ -3,9 +3,10 @@ AES128/192/256 + Cryptographically secure key/iv generator
 
 
 #### To do
-- determine type for Key schedule array, need 32 bit elements
-- implement g function for key scheduler
-- In key addition function, each element in key array --> 32 bits / data is 1 byte, need to resize key before addition.
+- Test key schedule and function g
+- implement function to perform encryption rounds
+- implement other key length variants 
+- implement different modes of AES
 
 
 #### non priority:
@@ -14,6 +15,7 @@ AES128/192/256 + Cryptographically secure key/iv generator
 
 
 
+#### Test  layers 1 - 3
 ```
 Layers 1-3
 Trace test for first 4 bytes:
@@ -34,4 +36,8 @@ After Mix col: (tested)
 0x05 0x7e 0x30 0x8f
 
 
+```
+
+#### Key schedule and function g
+```bash
 ```

@@ -8,6 +8,14 @@ int main(){
 
 	unsigned char Y[16];
 
+	unsigned char key[16] = {
+    0x8e, 0xe9, 0xd1, 0x09,
+    0x64, 0xf3, 0x63, 0xb9,
+    0xee, 0x38, 0x74, 0x70,
+    0xb0, 0x15, 0x50, 0x7a
+};
+
+
 	std::cout<<std::endl;
 	for(int i = 0; i < 16; i++){
 		if(i%4==0){std::cout<<"\n";}
@@ -16,7 +24,7 @@ int main(){
 	std::cout<<"\n";
 
 
-	AES::encrypt(A,Y);
+	AES::encrypt(A,Y,key);
 
 
 	std::cout<<std::endl;

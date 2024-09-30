@@ -96,18 +96,24 @@ void AES::applyKey(unsigned char C[], unsigned char K[]){
 
 
 //128 Key scheduler
-unsigned char* AES::genKey(unsigned char K[]){
+unsigned int* AES::genKey(unsigned char K[]){
 
-	// Each element in W must be 32 bits, unsigned char too small
-	//unsigned char W[44];
-	//unsigned char* w = W;
+	// will store 4 bytes in each element
+	unsigned int W[44];
+	unsigned int* w = W;
+	
+	// load first 4 bytes into W
+	W[0] = (K[0] << 24) | (K[1] << 16) | (K[2] << 8) | (K[3]);
 
-	// load key into first 4 of W
+	// bit set for testing purposes
+	//std::cout<<std::bitset<32>(c0);
 
 
+	unsigned int gConst = 1;
+	
 	// left most word for each round key
 	for(int i = 1; i <= 10; i++){
-		W[4*i] = W[4*(i-1)] + g(W[(4*i)-1]);
+		W[4*i] = W[4*(i-1)] + g(W[(4*i)-1], gConst);
 	}
 
 	// other 3 words for each round key
@@ -117,9 +123,55 @@ unsigned char* AES::genKey(unsigned char K[]){
 		}
 	}
 
+	
+	return w;
+}
 
-	//return w;
+// g function for key schedule
+unsigned int AES::g(unsigned int w, unsigned int& gConst){
 
+
+
+	// separate into 4 bytes
+	unsigned int a = (w >> 24);
+	unsigned int b = (w >> 16);
+	unsigned int c = (w >> 8);
+	unsigned int d = w;
+
+
+	// 2. S-box substitution 
+	// store in unsigned char to use byteSub function
+	unsigned char tempA = byteSub(a & 0xff);
+	unsigned char tempB = byteSub(b & 0xff);
+	unsigned char tempC = byteSub(c & 0xff);
+	unsigned char tempD = byteSub(d & 0xff);
+
+
+	// Add round constant to left most byte:
+	// const used , then shifted left by 1 --> if LMB set? --> mod p(x)
+	tempA ^= gConst;
+
+	// LMB set
+	if(gConst & 0x80){
+		gConst = (gConst << 1) ^ 0x11b;
+	}
+	else{
+		gConst <<= 1;
+	}
+
+
+	// Add 4 bytes back together after left rotation
+	a = b = c = d = 0;
+
+	a = a ^ tempA;
+	b = b ^ tempB;
+	c = c ^ tempC;
+	d = d ^ tempD;
+
+
+	unsigned int res = (b << 24) ^ (c << 16) ^ (d << 8) ^ a;
+	
+	return res;
 }
 
 // Galois field multiplication for Mix col funcion
@@ -168,12 +220,12 @@ unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 	}
 }
 
-void AES::encrypt(unsigned char A[], unsigned char Y[]){
+void AES::encrypt(unsigned char input[], unsigned char Y[], unsigned char KEY[]){
 
 	// start with bytesub layer
 	// call bytesub function for each byte
 	for(int i = 0; i < 16; i++){
-		Y[i] = byteSub(A[i]);
+		Y[i] = byteSub(input[i]);
 	}
 
 	// Shift row layer
@@ -183,6 +235,26 @@ void AES::encrypt(unsigned char A[], unsigned char Y[]){
 	// Mix column layer
 	// all 16 bytes passed
 	mixCol(Y);
+
+
+	// Generate key schedule
+	unsigned int* k = genKey(KEY);
+
+
+	std::cout<<std::bitset<32>(k[0])<<std::endl;
+	std::cout<<std::bitset<32>(k[1])<<std::endl;
+	std::cout<<std::bitset<32>(k[2])<<std::endl;
+	std::cout<<std::bitset<32>(k[3])<<std::endl;
+
+	std::cout<<std::bitset<32>(k[4])<<std::endl;
+	std::cout<<std::bitset<32>(k[5])<<std::endl;
+	std::cout<<std::bitset<32>(k[6])<<std::endl;
+	std::cout<<std::bitset<32>(k[7])<<std::endl;
+	std::cout<<std::bitset<32>(k[8])<<std::endl;
+	std::cout<<std::bitset<32>(k[9])<<std::endl;
+	std::cout<<std::bitset<32>(k[10])<<std::endl;
+	std::cout<<std::bitset<32>(k[11])<<std::endl;
+	std::cout<<std::bitset<32>(k[12])<<std::endl;
 }
 
 
