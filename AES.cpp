@@ -87,10 +87,28 @@ void AES::mixCol(unsigned char B[]){
 }
 
 // Key addition layer
-void AES::applyKey(unsigned char C[], unsigned char K[]){
+void AES::applyKey(unsigned char C[], unsigned int* k, int& keyIndex){
 
-	for(int i = 0; i < 16; i++){
-		C[i] = C[i]^K[i];
+	// key element -> 4 bytes
+	// data elem -> 1 byte
+
+	// 16 bytes of input
+	for(int byte = 0; byte < 16; byte+=4){
+
+		// 1. grab 4 bytes and reformat into 32 bit variable
+		// 3. apply key
+		// 4. break down again into 4 bytes
+
+		unsigned int temp = (C[byte] << 24) ^ (C[byte+1] << 16) ^ (C[byte+2] << 8) ^ (C[byte+3]);
+		temp ^= k[keyIndex++];
+
+		std::cout<<(int)keyIndex-1<<": "<<k[keyIndex-1]<<" "<<std::endl;
+
+		C[byte] = (temp >> 24);
+		C[byte+1] = (temp << 8) >> 24;
+		C[byte+2] = (temp << 16) >> 24;
+		C[byte+3] = (temp << 24) >> 24;
+
 	}
 }
 
@@ -222,8 +240,14 @@ unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 
 void AES::encrypt(unsigned char input[], unsigned char Y[], unsigned char KEY[]){
 
+	// Generate key schedule
+	unsigned int* k = genKey(KEY);
+	int keyIndex = 4;
+
+	// perform FIRST ROUND
+
 	// start with bytesub layer
-	// call bytesub function for each byte
+	// call bytesub function for each byte of the input
 	for(int i = 0; i < 16; i++){
 		Y[i] = byteSub(input[i]);
 	}
@@ -236,25 +260,39 @@ void AES::encrypt(unsigned char input[], unsigned char Y[], unsigned char KEY[])
 	// all 16 bytes passed
 	mixCol(Y);
 
+	// perform key addition
+	applyKey(Y, k, keyIndex);
 
-	// Generate key schedule
-	unsigned int* k = genKey(KEY);
+
+	// perform round 2 to 9
+	for(int i = 0; i < 8; i++){
+
+		// start with bytesub layer
+		// call bytesub function for each byte
+		for(int i = 0; i < 16; i++){
+			Y[i] = byteSub(Y[i]);
+		}
+
+		// Shift row layer
+		// all 16 bytes are passed
+		shiftRow(Y);
+
+		// Mix column layer
+		// all 16 bytes passed
+		mixCol(Y);
+
+		// perform key addition
+		applyKey(Y, k, keyIndex);
+	}
 
 
-	std::cout<<std::bitset<32>(k[0])<<std::endl;
-	std::cout<<std::bitset<32>(k[1])<<std::endl;
-	std::cout<<std::bitset<32>(k[2])<<std::endl;
-	std::cout<<std::bitset<32>(k[3])<<std::endl;
+	// perform round 10 without mixing columns
+	for(int i = 0; i < 16; i++){
+		Y[i] = byteSub(Y[i]);
+	}
 
-	std::cout<<std::bitset<32>(k[4])<<std::endl;
-	std::cout<<std::bitset<32>(k[5])<<std::endl;
-	std::cout<<std::bitset<32>(k[6])<<std::endl;
-	std::cout<<std::bitset<32>(k[7])<<std::endl;
-	std::cout<<std::bitset<32>(k[8])<<std::endl;
-	std::cout<<std::bitset<32>(k[9])<<std::endl;
-	std::cout<<std::bitset<32>(k[10])<<std::endl;
-	std::cout<<std::bitset<32>(k[11])<<std::endl;
-	std::cout<<std::bitset<32>(k[12])<<std::endl;
+	shiftRow(Y);
+	applyKey(Y, k, keyIndex);
 }
 
 

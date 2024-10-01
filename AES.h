@@ -40,7 +40,7 @@ class AES{
             Key addition layer
             XOR(add) data to key
         */
-        static void applyKey(unsigned char C[], unsigned char K[]);
+        static void applyKey(unsigned char C[], unsigned int* k, int& keyIndex);
 
 
         /*

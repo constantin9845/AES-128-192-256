@@ -3,8 +3,9 @@ AES128/192/256 + Cryptographically secure key/iv generator
 
 
 #### To do
-- Test key schedule and function g
-- implement function to perform encryption rounds
+- initial 128 key encryption done -> need testing, check bugs
+- implement decryption
+
 - implement other key length variants 
 - implement different modes of AES
 
