@@ -5,8 +5,8 @@ class AES{
 	public:
 
         // takes array 16 bytes of plain text / (text in hexadecimal)
-        // takes a second array of same size, empty --> for result
-		static void encrypt(unsigned char A[], unsigned char Y[], unsigned char KEY[]);
+        // takes a second array of same size that contains the key
+		static unsigned char* encrypt(unsigned char A[], unsigned char KEY[]);
 
 	private:
 

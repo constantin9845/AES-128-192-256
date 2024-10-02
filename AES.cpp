@@ -102,8 +102,6 @@ void AES::applyKey(unsigned char C[], unsigned int* k, int& keyIndex){
 		unsigned int temp = (C[byte] << 24) ^ (C[byte+1] << 16) ^ (C[byte+2] << 8) ^ (C[byte+3]);
 		temp ^= k[keyIndex++];
 
-		std::cout<<(int)keyIndex-1<<": "<<k[keyIndex-1]<<" "<<std::endl;
-
 		C[byte] = (temp >> 24);
 		C[byte+1] = (temp << 8) >> 24;
 		C[byte+2] = (temp << 16) >> 24;
@@ -119,35 +117,45 @@ unsigned int* AES::genKey(unsigned char K[]){
 	// will store 4 bytes in each element
 	unsigned int W[44];
 	unsigned int* w = W;
+
 	
 	// load first 4 bytes into W
 	W[0] = (K[0] << 24) | (K[1] << 16) | (K[2] << 8) | (K[3]);
+	W[1] = (K[4] << 24) | (K[5] << 16) | (K[6] << 8) | (K[7]);
+	W[2] = (K[8] << 24) | (K[9] << 16) | (K[10] << 8) | (K[11]);
+	W[3] = (K[12] << 24) | (K[13] << 16) | (K[14] << 8) | (K[15]);
+
 
 	// bit set for testing purposes
 	//std::cout<<std::bitset<32>(c0);
 
 
 	unsigned int gConst = 1;
+
 	
 	// left most word for each round key
 	for(int i = 1; i <= 10; i++){
-		W[4*i] = W[4*(i-1)] + g(W[(4*i)-1], gConst);
+		W[4*i] = W[4*(i-1)] ^ g(W[(4*i)-1], gConst);
 	}
 
 	// other 3 words for each round key
 	for(int i = 1; i <= 10; i++){
 		for(int j = 1; j <= 3; j++){
-			W[(4*i)+j] = W[(4*i)+j-1] + W[4*(i-1)+j];
+			W[(4*i)+j] = W[(4*i)+j-1] ^ W[4*(i-1)+j];
 		}
 	}
 
+	
+	for(int i = 0; i < 44; i+=4){
+		std::cout<<std::bitset<32>(W[i])<<std::endl;
+	}
+	
 	
 	return w;
 }
 
 // g function for key schedule
 unsigned int AES::g(unsigned int w, unsigned int& gConst){
-
 
 
 	// separate into 4 bytes
@@ -174,7 +182,7 @@ unsigned int AES::g(unsigned int w, unsigned int& gConst){
 		gConst = (gConst << 1) ^ 0x11b;
 	}
 	else{
-		gConst <<= 1;
+		gConst = gConst << 1;
 	}
 
 
@@ -238,7 +246,11 @@ unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 	}
 }
 
-void AES::encrypt(unsigned char input[], unsigned char Y[], unsigned char KEY[]){
+unsigned char* AES::encrypt(unsigned char input[], unsigned char KEY[]){
+
+	// strores ciphertext
+	unsigned char Y[16];
+	unsigned char* y = Y;
 
 	// Generate key schedule
 	unsigned int* k = genKey(KEY);
@@ -293,6 +305,8 @@ void AES::encrypt(unsigned char input[], unsigned char Y[], unsigned char KEY[])
 
 	shiftRow(Y);
 	applyKey(Y, k, keyIndex);
+
+	return y;
 }
 
 
