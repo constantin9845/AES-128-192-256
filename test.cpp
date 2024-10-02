@@ -18,13 +18,6 @@ int main(){
     };
 
 
-	std::cout<<std::endl;
-	for(int i = 0; i < 16; i++){
-		if(i%4==0){std::cout<<"\n";}
-		std::cout<<std::hex<<(int)key[i]<<" ";
-	}
-	std::cout<<"\n";
-
 
 	unsigned char* Y = AES::encrypt(A,key);
 

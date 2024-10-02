@@ -88,7 +88,13 @@ void AES::mixCol(unsigned char B[]){
 
 // Key addition layer
 void AES::applyKey(unsigned char C[], unsigned int* k, int& keyIndex){
-
+	/*
+	for(int i = 4; i < 44; i++){
+		std::cout<<std::hex<<(int)k[i]<<" ";
+	}
+	std::cout<<std::endl;
+	std::cout<<"*****************************"<<std::endl;
+	*/
 	// key element -> 4 bytes
 	// data elem -> 1 byte
 
@@ -102,10 +108,10 @@ void AES::applyKey(unsigned char C[], unsigned int* k, int& keyIndex){
 		unsigned int temp = (C[byte] << 24) ^ (C[byte+1] << 16) ^ (C[byte+2] << 8) ^ (C[byte+3]);
 		temp ^= k[keyIndex++];
 
-		C[byte] = (temp >> 24);
-		C[byte+1] = (temp << 8) >> 24;
-		C[byte+2] = (temp << 16) >> 24;
-		C[byte+3] = (temp << 24) >> 24;
+		C[byte] = (temp >> 24) & 0xFF;
+		C[byte+1] = (temp >> 16) & 0xFF;
+		C[byte+2] = (temp >> 8) & 0xFF;
+		C[byte+3] = temp & 0xFF;
 
 	}
 }
@@ -115,8 +121,7 @@ void AES::applyKey(unsigned char C[], unsigned int* k, int& keyIndex){
 unsigned int* AES::genKey(unsigned char K[]){
 
 	// will store 4 bytes in each element
-	unsigned int W[44];
-	unsigned int* w = W;
+	unsigned int* W = new unsigned int[44];
 
 	
 	// load first 4 bytes into W
@@ -125,52 +130,41 @@ unsigned int* AES::genKey(unsigned char K[]){
 	W[2] = (K[8] << 24) | (K[9] << 16) | (K[10] << 8) | (K[11]);
 	W[3] = (K[12] << 24) | (K[13] << 16) | (K[14] << 8) | (K[15]);
 
+	unsigned int gConst = 1; // round constant
 
-	// bit set for testing purposes
-	//std::cout<<std::bitset<32>(c0);
-
-
-	unsigned int gConst = 1;
-
-	
-	// left most word for each round key
-	for(int i = 1; i <= 10; i++){
-		W[4*i] = W[4*(i-1)] ^ g(W[(4*i)-1], gConst);
-	}
-
-	// other 3 words for each round key
-	for(int i = 1; i <= 10; i++){
-		for(int j = 1; j <= 3; j++){
-			W[(4*i)+j] = W[(4*i)+j-1] ^ W[4*(i-1)+j];
+	// key expansion
+	for(int i = 4; i < 44; i++){
+		if(i % 4 == 0){
+			W[i] = W[i-4] ^ g(W[i-1], gConst);
+		}
+		else{
+			W[i] = W[i-1] ^ W[i-4]; 
 		}
 	}
-
 	
-	for(int i = 0; i < 44; i+=4){
-		std::cout<<std::bitset<32>(W[i])<<std::endl;
-	}
-	
-	
-	return w;
+	return W;
 }
 
 // g function for key schedule
 unsigned int AES::g(unsigned int w, unsigned int& gConst){
 
+	// rotate left
+	unsigned rotatedW = (w << 8) | (w >> 24);
+
 
 	// separate into 4 bytes
-	unsigned int a = (w >> 24);
-	unsigned int b = (w >> 16);
-	unsigned int c = (w >> 8);
-	unsigned int d = w;
+	unsigned char a = (rotatedW >> 24) & 0xFF;
+	unsigned int b = (rotatedW >> 16) & 0xFF;
+	unsigned int c = (rotatedW >> 8) & 0xFF;
+	unsigned int d = rotatedW & 0xFF;
 
 
 	// 2. S-box substitution 
 	// store in unsigned char to use byteSub function
-	unsigned char tempA = byteSub(a & 0xff);
-	unsigned char tempB = byteSub(b & 0xff);
-	unsigned char tempC = byteSub(c & 0xff);
-	unsigned char tempD = byteSub(d & 0xff);
+	unsigned char tempA = byteSub(a);
+	unsigned char tempB = byteSub(b);
+	unsigned char tempC = byteSub(c);
+	unsigned char tempD = byteSub(d);
 
 
 	// Add round constant to left most byte:
@@ -179,7 +173,7 @@ unsigned int AES::g(unsigned int w, unsigned int& gConst){
 
 	// LMB set
 	if(gConst & 0x80){
-		gConst = (gConst << 1) ^ 0x11b;
+		gConst = (gConst << 1) ^ 0x11B;
 	}
 	else{
 		gConst = gConst << 1;
@@ -195,7 +189,8 @@ unsigned int AES::g(unsigned int w, unsigned int& gConst){
 	d = d ^ tempD;
 
 
-	unsigned int res = (b << 24) ^ (c << 16) ^ (d << 8) ^ a;
+	// combine bytes back together into a word
+	unsigned int res = (tempA << 24) ^ (tempB << 16) ^ (tempC << 8) ^ tempD;
 	
 	return res;
 }
@@ -250,11 +245,14 @@ unsigned char* AES::encrypt(unsigned char input[], unsigned char KEY[]){
 
 	// strores ciphertext
 	unsigned char Y[16];
-	unsigned char* y = Y;
 
 	// Generate key schedule
 	unsigned int* k = genKey(KEY);
 	int keyIndex = 4;
+
+	for(int i = 0; i < 44; i++){
+		std::cout<<k[i]<<std::endl;
+	}
 
 	// perform FIRST ROUND
 
@@ -306,6 +304,10 @@ unsigned char* AES::encrypt(unsigned char input[], unsigned char KEY[]){
 	shiftRow(Y);
 	applyKey(Y, k, keyIndex);
 
+	delete[] k;
+	k = nullptr;
+	
+	unsigned char* y = Y;
 	return y;
 }
 
