@@ -6,7 +6,7 @@ unsigned char AES::byteSub(unsigned char A){
 }
 
 // shift row layer
-void AES::shiftRow(unsigned char B[]){
+void AES::shiftRow(unsigned char* B){
 	unsigned char temp[4][4];
 
 	int index = 0;
@@ -58,7 +58,7 @@ void AES::shiftRow(unsigned char B[]){
 }
 
 // Mix column layer
-void AES::mixCol(unsigned char B[]){
+void AES::mixCol(unsigned char* B){
 	unsigned char temp[16];
 
 	// Each 4 bytes are a column
@@ -87,7 +87,7 @@ void AES::mixCol(unsigned char B[]){
 }
 
 // Key addition layer
-void AES::applyKey(unsigned char C[], unsigned int* k, int& keyIndex){
+void AES::applyKey(unsigned char* C, unsigned int* k, int& keyIndex){
 	/*
 	for(int i = 4; i < 44; i++){
 		std::cout<<std::hex<<(int)k[i]<<" ";
@@ -244,15 +244,11 @@ unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 unsigned char* AES::encrypt(unsigned char input[], unsigned char KEY[]){
 
 	// strores ciphertext
-	unsigned char Y[16];
+	unsigned char* Y = new unsigned char[16];
 
 	// Generate key schedule
 	unsigned int* k = genKey(KEY);
 	int keyIndex = 4;
-
-	for(int i = 0; i < 44; i++){
-		std::cout<<k[i]<<std::endl;
-	}
 
 	// perform FIRST ROUND
 
@@ -307,8 +303,7 @@ unsigned char* AES::encrypt(unsigned char input[], unsigned char KEY[]){
 	delete[] k;
 	k = nullptr;
 	
-	unsigned char* y = Y;
-	return y;
+	return Y;
 }
 
 

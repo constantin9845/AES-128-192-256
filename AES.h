@@ -25,7 +25,7 @@ class AES{
             perform row shift 
             takes all 16 bytes at once
         */
-        static void shiftRow(unsigned char B[]);
+        static void shiftRow(unsigned char* B);
 
  
         /*
@@ -33,14 +33,14 @@ class AES{
             perform Mix column 
             takes all 16 bytes at once
         */
-        static void mixCol(unsigned char B[]);
+        static void mixCol(unsigned char* B);
 
 
         /*
             Key addition layer
             XOR(add) data to key
         */
-        static void applyKey(unsigned char C[], unsigned int* k, int& keyIndex);
+        static void applyKey(unsigned char* C, unsigned int* k, int& keyIndex);
 
 
         /*

@@ -3,8 +3,7 @@ AES128/192/256 + Cryptographically secure key/iv generator
 
 
 #### To do
-- Fix output inconsistency. key schedule is now consistent
-- encrypt function logic?
+- output consistent - but wrong output?
 - implement decryption
 
 - implement other key length variants 
