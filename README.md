@@ -4,7 +4,8 @@ AES128/192/256 + Cryptographically secure key/iv generator
 
 #### To do
 - output consistent - but wrong output?
-- implement decryption
+- implement decryption - key schedule left
+- test inverse functions for every layer
 
 - implement other key length variants 
 - implement different modes of AES

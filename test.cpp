@@ -32,8 +32,7 @@ int main(){
 }
 
 // correct output:
-// 40 23 14 91 0A 7F 3D 60 1F F9 5B 2B B2 7A 11 B9
-// 40 23 14 91 0A 7F 3D 60 1F F9 5B 2B B2 7A 11 B9
+// F8 40 4A 16 35 46 D4 05 10 28 B3 32 7D 80 A5 B4 
 
 // current output:
 // 14 CD D9 5C 91 0E F7 96 91 3D C6 AC 3C 6C C9 F1

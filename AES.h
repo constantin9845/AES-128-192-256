@@ -8,6 +8,10 @@ class AES{
         // takes a second array of same size that contains the key
 		static unsigned char* encrypt(unsigned char A[], unsigned char KEY[]);
 
+        // takes array of 16 bytes of ciphertext (in hexadecimal)
+        // takes in 128 bit key
+        static unsigned char* decrypt(unsigned char A[], unsigned char KEY[]);
+
 	private:
 
         /*
@@ -17,8 +21,12 @@ class AES{
         */
         static unsigned char byteSub(unsigned char A);
 
-        // second bytesub that will perform calculation in GF(2^8) instead of table lookup
-        // TO DO
+        /*
+            Inverse Layer 1
+            perform inverse byte substitution by table lookup
+            takes one byte
+        */
+        static unsigned char inverseByteSub(unsigned char A);
 
         /*
             Layer 2
@@ -27,6 +35,13 @@ class AES{
         */
         static void shiftRow(unsigned char* B);
 
+        /*
+            Inverse ayer 2
+            perform inverse row shift 
+            takes all 16 bytes at once
+        */
+        static void inverseShiftRow(unsigned char* B);
+
  
         /*
             Layer 3
@@ -34,6 +49,13 @@ class AES{
             takes all 16 bytes at once
         */
         static void mixCol(unsigned char* B);
+
+        /*
+            Inverse Layer 3
+            perform Inverse Mix column 
+            takes all 16 bytes at once
+        */
+        static void inverseMixCol(unsigned char* B);
 
 
         /*
@@ -146,6 +168,12 @@ const unsigned char MIXCOL_MATRIX [4][4] = {
     {0x03, 0x01, 0x01, 0x02}
 };
 
-
+// Constant inverse matrix for Mix column function
+const unsigned char INVERSE_MIXCOL_MATRIX [4][4] = {
+    {0x0E, 0x0B, 0x0D, 0x09},
+    {0x09, 0x0E, 0x0B, 0x0D},
+    {0x0D, 0x09, 0x0E, 0x0B},
+    {0x0B, 0x0D, 0x09, 0x0E}
+};
 
 
