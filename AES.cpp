@@ -202,6 +202,30 @@ void AES::applyKey(unsigned char* C, unsigned int* k, int& keyIndex){
 	}
 }
 
+// Inverse Key addition layer
+void AES::inverseApplyKey(unsigned char* C, unsigned int* k, int& keyIndex){
+
+	// key element -> 4 bytes
+	// data elem -> 1 byte
+
+	// 16 bytes of input
+	for(int byte = 0; byte < 16; byte+=4){
+
+		// 1. grab 4 bytes and reformat into 32 bit variable
+		// 3. apply key
+		// 4. break down again into 4 bytes
+
+		unsigned int temp = (C[byte] << 24) ^ (C[byte+1] << 16) ^ (C[byte+2] << 8) ^ (C[byte+3]);
+		temp ^= k[keyIndex--];
+
+		C[byte] = (temp >> 24) & 0xFF;
+		C[byte+1] = (temp >> 16) & 0xFF;
+		C[byte+2] = (temp >> 8) & 0xFF;
+		C[byte+3] = temp & 0xFF;
+
+	}
+}
+
 
 //128 Key scheduler
 unsigned int* AES::genKey(unsigned char K[]){
@@ -211,10 +235,10 @@ unsigned int* AES::genKey(unsigned char K[]){
 
 	
 	// load first 4 bytes into W
-	W[0] = (K[0] << 24) | (K[1] << 16) | (K[2] << 8) | (K[3]);
-	W[1] = (K[4] << 24) | (K[5] << 16) | (K[6] << 8) | (K[7]);
-	W[2] = (K[8] << 24) | (K[9] << 16) | (K[10] << 8) | (K[11]);
-	W[3] = (K[12] << 24) | (K[13] << 16) | (K[14] << 8) | (K[15]);
+	W[0] = (K[0] << 24) ^ (K[1] << 16) ^ (K[2] << 8) ^ (K[3]);
+	W[1] = (K[4] << 24) ^ (K[5] << 16) ^ (K[6] << 8) ^ (K[7]);
+	W[2] = (K[8] << 24) ^ (K[9] << 16) ^ (K[10] << 8) ^ (K[11]);
+	W[3] = (K[12] << 24) ^ (K[13] << 16) ^ (K[14] << 8) ^ (K[15]);
 
 	unsigned int gConst = 1; // round constant
 
@@ -235,27 +259,27 @@ unsigned int* AES::genKey(unsigned char K[]){
 unsigned int AES::g(unsigned int w, unsigned int& gConst){
 
 	// rotate left
-	unsigned rotatedW = (w << 8) | (w >> 24);
+	unsigned int rotatedW = (w << 8) | (w >> 24);
 
 
 	// separate into 4 bytes
 	unsigned char a = (rotatedW >> 24) & 0xFF;
-	unsigned int b = (rotatedW >> 16) & 0xFF;
-	unsigned int c = (rotatedW >> 8) & 0xFF;
-	unsigned int d = rotatedW & 0xFF;
+	unsigned char b = (rotatedW >> 16) & 0xFF;
+	unsigned char c = (rotatedW >> 8) & 0xFF;
+	unsigned char d = rotatedW & 0xFF;
 
 
 	// 2. S-box substitution 
 	// store in unsigned char to use byteSub function
-	unsigned char tempA = byteSub(a);
-	unsigned char tempB = byteSub(b);
-	unsigned char tempC = byteSub(c);
-	unsigned char tempD = byteSub(d);
+	a = byteSub(a);
+	b = byteSub(b);
+	c = byteSub(c);
+	d = byteSub(d);
 
 
 	// Add round constant to left most byte:
 	// const used , then shifted left by 1 --> if LMB set? --> mod p(x)
-	tempA ^= gConst;
+	a ^= gConst;
 
 	// LMB set
 	if(gConst & 0x80){
@@ -266,17 +290,8 @@ unsigned int AES::g(unsigned int w, unsigned int& gConst){
 	}
 
 
-	// Add 4 bytes back together after left rotation
-	a = b = c = d = 0;
-
-	a = a ^ tempA;
-	b = b ^ tempB;
-	c = c ^ tempC;
-	d = d ^ tempD;
-
-
 	// combine bytes back together into a word
-	unsigned int res = (tempA << 24) ^ (tempB << 16) ^ (tempC << 8) ^ tempD;
+	unsigned int res = (a << 24) ^ (b << 16) ^ (c << 8) ^ d;
 	
 	return res;
 }
@@ -421,7 +436,24 @@ unsigned char* AES::encrypt(unsigned char input[], unsigned char KEY[]){
 
 	// Generate key schedule
 	unsigned int* k = genKey(KEY);
-	int keyIndex = 4;
+	int keyIndex = 0;
+
+	for(int i = 0; i < 16; i++){
+		Y[i] = input[i];
+	}
+
+
+	// Key whitening
+	applyKey(Y, k, keyIndex);
+
+
+	for(int i = 0; i < 44; i++){
+		if(i%4 == 0){
+			std::cout<<"\n";
+		}
+		std::cout<<std::hex<<(int) k[i]<<" ";
+	}
+	std::cout<<std::endl;
 
 
 	// perform round 1 to 9
@@ -451,11 +483,6 @@ unsigned char* AES::encrypt(unsigned char input[], unsigned char KEY[]){
 
 		// perform key addition
 		applyKey(Y, k, keyIndex);
-
-		for(int i = 0; i < 16; i++){
-			std::cout<<std::hex<<(int)Y[i]<<" ";
-		}
-		std::cout<<std::endl;
 	}
 
 
@@ -467,18 +494,13 @@ unsigned char* AES::encrypt(unsigned char input[], unsigned char KEY[]){
 	shiftRow(Y);
 	applyKey(Y, k, keyIndex);
 
-	for(int i = 0; i < 16; i++){
-		std::cout<<std::hex<<(int)Y[i]<<" ";
-	}
-	std::cout<<std::endl;
-
 	delete[] k;
 	k = nullptr;
 	
 	return Y;
 }
 
-unsigned char* decrypt(unsigned char A[], unsigned char KEY[]){
+unsigned char* AES::decrypt(unsigned char A[], unsigned char KEY[]){
 	/*
 	Structure
 	1. key addition
@@ -487,8 +509,44 @@ unsigned char* decrypt(unsigned char A[], unsigned char KEY[]){
 	4. inverse Byte Sub
 	*/
 
-	// Perform round 1
+	// strores plain text
+	unsigned char* Y = new unsigned char[16];
 
+	for(int i = 0; i < 16; i++){
+		Y[i] = A[i];
+	}
+
+	// Generate key schedule
+	unsigned int* k = genKey(KEY);
+	int keyIndex = 43;
+
+
+	// Perform round 1
+	inverseApplyKey(Y, k, keyIndex);
+	inverseShiftRow(Y);
+
+	for(int i = 0; i < 16; i++){
+		Y[i] = inverseByteSub(Y[i]);
+	}
+
+	// perform remaining rounds
+	for(int i = 1; i < 10; i++){
+		inverseApplyKey(Y, k, keyIndex);
+		inverseMixCol(Y);
+		inverseShiftRow(Y);
+
+		for(int i = 0; i < 16; i++){
+			Y[i] = inverseByteSub(Y[i]);
+		}
+	}
+
+
+	inverseApplyKey(Y, k, keyIndex);
+
+	delete[] k;
+	k = nullptr;
+	
+	return Y;
 }
 
 

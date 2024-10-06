@@ -66,6 +66,14 @@ class AES{
 
 
         /*
+            Inverse Key addition layer
+            XOR(add) data to key
+            key index is decremented
+        */
+        static void inverseApplyKey(unsigned char* C, unsigned int* k, int& keyIndex);
+
+
+        /*
             128 Key scheduler
             Generates key 
         */
