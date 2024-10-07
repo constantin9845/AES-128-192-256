@@ -3,37 +3,43 @@
 
 int main(){
 	unsigned char A[] = {
-		0xb9, 0x14, 0x5a, 0x76,
-		0x8b, 0x7d, 0xc4, 0x89,
-		0xa0, 0x96, 0xb5, 0x46,
-		0xf4, 0x3b, 0x23, 0x1f
+		0x49, 0x20, 0x6e, 0x65,
+		0x65, 0x64, 0x20, 0x68,
+		0x65, 0x6c, 0x70, 0x20,
+		0x6e, 0x6f, 0x77, 0x0a
 	};
 
 
 	unsigned char key[16] = {
-		0x13, 0x9a, 0x35, 0x42,
-		0x2f, 0x1d, 0x61, 0xde,
-		0x3c, 0x91, 0x78, 0x7f,
-		0xe0, 0x50, 0x7a, 0xfd
+		0x0f, 0x0f, 0x0f, 0x0f,
+		0x0f, 0x0f, 0x0f, 0x0f,
+		0x0f, 0x0f, 0x0f, 0x0f,
+		0x0f, 0x0f, 0x0f, 0x0f
     };
 
-    //KEY = 		13 9a 35 42 2f 1d 61 de 3c 91 78 7f e0 50 7a fd
-	//PLAINTEXT = 	b9 14 5a 76 8b 7d c4 89 a0 96 b5 46 f4 3b 23 1f
-	//CIPHERTEXT = 	d7 c3 ff ac 90 31 23 86 50 90 1e 15 73 64 c3 86
-
-	std::cout<<std::endl;
+    std::cout<<std::endl;
 	for(int i = 0; i < 16; i++){
-		std::cout<<std::hex<<(int) key[i]<<" ";
-	}
-	std::cout<<std::endl;
-	for(int i = 0; i < 16; i++){
-		std::cout<<std::hex<<(int) A[i]<<" ";
+		std::cout<<std::hex<<(int)A[i]<<" ";
 	}
 	std::cout<<std::endl;
 
 	unsigned char* Y = AES::encrypt(A,key);
 
+	std::cout<<std::endl;
+	for(int i = 0; i < 16; i++){
+		std::cout<<std::hex<<(int)Y[i]<<" ";
+	}
+	std::cout<<std::endl;
+
 	unsigned char* RES = AES::decrypt(Y, key);
+
+	std::cout<<std::endl;
+	for(int i = 0; i < 16; i++){
+		std::cout<<std::hex<<(int)RES[i]<<" ";
+	}
+	std::cout<<std::endl;
+
+	
 
 	delete[] Y;
 	delete[] RES;
@@ -41,9 +47,16 @@ int main(){
 	return 0;
 }
 
-// correct output:
-// F8 40 4A 16 35 46 D4 05 10 28 B3 32 7D 80 A5 B4 
+// correct output (encryption):
+// 38 5b 88 c3 ab 76 00 56 d4 18 3f 12 e3 52 a3 93
 
-// current output:
-// 37 CB 7C 19 B0 1F ED 7f E4 9D CF 7B EF B5 AF 21
-// 37 cb 7c 19 b0 1f ed 7f e4 9d cf 7b ef b5 af 21
+
+// currently
+// input:
+// 49 20 6e 65 65 64 20 68 65 6c 70 20 6e 6f 77 0a
+
+// cipher text:
+// 02 f4 32 3f ad 8b 14 47 ad 7f 8b fd fa 07 62 cd
+
+// decrypt:
+// 8c bf a9 22 55 ba 1f 13 7d df b4 d6 ad 93 87 c3

@@ -3,7 +3,8 @@ AES128/192/256 + Cryptographically secure key/iv generator
 
 
 #### To do
-- output consistent - but wrong output -> key schedule is not correct - debug
+- output consistent - but wrong output -> key schedule is correct
+- verify shift rows and mix cols -> are rows and cols not transposed incorrectly? 
 
 
 - implement other key length variants 

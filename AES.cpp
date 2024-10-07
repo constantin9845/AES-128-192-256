@@ -174,13 +174,6 @@ void AES::inverseMixCol(unsigned char* B){
 
 // Key addition layer
 void AES::applyKey(unsigned char* C, unsigned int* k, int& keyIndex){
-	/*
-	for(int i = 4; i < 44; i++){
-		std::cout<<std::hex<<(int)k[i]<<" ";
-	}
-	std::cout<<std::endl;
-	std::cout<<"*****************************"<<std::endl;
-	*/
 	// key element -> 4 bytes
 	// data elem -> 1 byte
 
@@ -431,7 +424,7 @@ unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 
 unsigned char* AES::encrypt(unsigned char input[], unsigned char KEY[]){
 
-	// strores ciphertext
+	// stores ciphertext
 	unsigned char* Y = new unsigned char[16];
 
 	// Generate key schedule
@@ -445,15 +438,6 @@ unsigned char* AES::encrypt(unsigned char input[], unsigned char KEY[]){
 
 	// Key whitening
 	applyKey(Y, k, keyIndex);
-
-
-	for(int i = 0; i < 44; i++){
-		if(i%4 == 0){
-			std::cout<<"\n";
-		}
-		std::cout<<std::hex<<(int) k[i]<<" ";
-	}
-	std::cout<<std::endl;
 
 
 	// perform round 1 to 9
@@ -509,7 +493,7 @@ unsigned char* AES::decrypt(unsigned char A[], unsigned char KEY[]){
 	4. inverse Byte Sub
 	*/
 
-	// strores plain text
+	// stores plain text
 	unsigned char* Y = new unsigned char[16];
 
 	for(int i = 0; i < 16; i++){
@@ -539,7 +523,6 @@ unsigned char* AES::decrypt(unsigned char A[], unsigned char KEY[]){
 			Y[i] = inverseByteSub(Y[i]);
 		}
 	}
-
 
 	inverseApplyKey(Y, k, keyIndex);
 
