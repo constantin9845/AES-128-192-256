@@ -3,9 +3,9 @@ AES128/192/256 + Cryptographically secure key/iv generator
 
 
 #### To do
-- output consistent - but wrong output -> key schedule is correct
-- verify shift rows and mix cols -> are rows and cols not transposed incorrectly? 
-
+- Debug inverse shift row 
+- finish testing decryption
+- Optimize functions
 
 - implement other key length variants 
 - implement different modes of AES
@@ -14,19 +14,26 @@ AES128/192/256 + Cryptographically secure key/iv generator
 #### non priority:
 - implement galois multiplication for bytesub instead of table look up.
 - add key generator dev/urandom/
+- test script
 
 
+#### Find errors
+
+Test vectors  key schedule: https://www.samiam.org/key-schedule.html
+Test vectors Key + layer results : AES_Core128.pdf
+
+- Key expansion correct (verified)
+
+- Byte substitution correct (verified)
+
+- Mix column correct (verified) 
+		- bug fixed -> wrong column and row index variables when storing result
+
+- Encryption finished (verified)
 
 
-#### Key schedule error
-```
-Key = 0123456789abcdef
-data = testing this fun / 0x74,0x65,0x73,0x74,0x69,0x6E,0x67,0x20,0x74,0x68,0x69,0x73,0x20,0x66,0x75,0x6E
+- Decryption:
 
+- Bug fixed : decryption key application -> index not in reverse order but in reverse words (4 bytes)
 
-- Bug : key schedule not consistent with same key
-
--> bug fixed: genKey function returned pointer to local variable. with correct pointer and array -> key schedule consistent
-```
-
-
+- Bug in inverse shift row layer

@@ -70,7 +70,7 @@ class AES{
             XOR(add) data to key
             key index is decremented
         */
-        static void inverseApplyKey(unsigned char* C, unsigned int* k, int& keyIndex);
+        static void inverseApplyKey(unsigned char* C, unsigned int* k, int keyIndex);
 
 
         /*
