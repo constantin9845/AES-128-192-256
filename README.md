@@ -3,7 +3,7 @@ AES128/192/256 + Cryptographically secure key/iv generator
 
 
 #### To do
-- Debug : inverse Mix column function output wrong
+- Debug : inverse Mix column function output wrong -> multiplication not correct
 - finish testing decryption
 - Optimize functions
 
@@ -37,3 +37,4 @@ Test vectors Key + layer results : AES_Core128.pdf
 - Bug fixed : decryption key application -> index not in reverse order but in reverse words (4 bytes)
 
 - Bug fixed : inverse shift row layer - wrong indexing
+

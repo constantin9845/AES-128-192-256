@@ -175,7 +175,6 @@ void AES::inverseMixCol(unsigned char* B){
 		}
 	}
 
-
 	for(int i = 0; i < 4; i++){
 
 
@@ -383,12 +382,10 @@ unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 		//perform shift
 		unsigned char shifted = b<<3;
 
-		// one of 3 LMB set --> reduce
 		if(b & 0xE0){
 			shifted ^= 0x1B;
 		}
 
-		// XOR(add) to initial value
 		return shifted ^ b;
 	}
 
@@ -398,15 +395,16 @@ unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 	else if(temp == 0x0B){
 		//perform shifts
 		unsigned char shifted = b<<3;
-		unsigned char shifted2 = b<<1;
-
-		// LMB set --> reduce both
 		if(b & 0xE0){
 			shifted ^= 0x1B;
+		}
+
+
+		unsigned char shifted2 = b<<1;
+		if(b & 0x80){
 			shifted2 ^= 0x1B;
 		}
 
-		// XOR(add) to initial value
 		return shifted ^ shifted2 ^ b;
 	}
 
@@ -416,11 +414,12 @@ unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 	else if(temp == 0x0D){
 		//perform shifts
 		unsigned char shifted = b<<3;
-		unsigned char shifted2 = b<<2;
-
-		// LMB set --> reduce both
-		if(b & 0xE0){
+		if(shifted & 0x80){
 			shifted ^= 0x1B;
+		}
+
+		unsigned char shifted2 = b<<2;
+		if(shifted2 & 0x80){
 			shifted2 ^= 0x1B;
 		}
 
@@ -434,17 +433,20 @@ unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 	else if(temp == 0x0E){
 		//perform shifts
 		unsigned char shifted = b<<3;
-		unsigned char shifted2 = b<<2;
-		unsigned char shifted3 = b<<1;
-
-		// Check if any of 3 LMB set
-		if(b & 0xE0){
+		if(shifted & 0x80){
 			shifted ^= 0x1B;
+		}
+
+		unsigned char shifted2 = b<<2;
+		if(shifted2 & 0x80){
 			shifted2 ^= 0x1B;
+		}
+
+		unsigned char shifted3 = b<<1;
+		if(shifted3 & 0x80){
 			shifted3 ^= 0x1B;
 		}
 
-		// XOR(add) to initial value
 		return shifted ^ shifted2 ^ shifted3;
 	}
 
@@ -541,17 +543,31 @@ unsigned char* AES::decrypt(unsigned char A[], unsigned char KEY[]){
 
 	inverseShiftRow(Y);
 
+	std::cout << "Test 1: 0x57 * 0x01 = " << std::hex << (int)AES::GFmultiply(0x57, 0x01) << std::endl;
+
+    // Test case 2: Multiply by 2 (0x57 * 0x02)
+    std::cout << "Test 2: 0x57 * 0x02 = " << std::hex << (int)AES::GFmultiply(0x57, 0x02) << std::endl;
+
+    // Test case 3: Multiply by 3 (0x57 * 0x03)
+    std::cout << "Test 3: 0x57 * 0x03 = " << std::hex << (int)AES::GFmultiply(0x57, 0x03) << std::endl;
+
+    // Test case 4: Multiply by 9 (0x57 * 0x09)
+    std::cout << "Test 4: 0x57 * 0x09 = " << std::hex << (int)AES::GFmultiply(0x57, 0x09) << std::endl;
+
+    // Test case 5: Multiply by 11 (0x57 * 0x0B)
+    std::cout << "Test 5: 0x57 * 0x0B = " << std::hex << (int)AES::GFmultiply(0x57, 0x0B) << std::endl;
+
+    // Test case 6: Multiply by 13 (0x57 * 0x0D)
+    std::cout << "Test 6: 0x57 * 0x0D = " << std::hex << (int)AES::GFmultiply(0x57, 0x0D) << std::endl;
+
+    // Test case 7: Multiply by 14 (0x57 * 0x0E)
+    std::cout << "Test 7: 0x57 * 0x0E = " << std::hex << (int)AES::GFmultiply(0x57, 0x0E) << std::endl;
+
+    exit(2);
 
 	// perform remaining rounds
 	for(int i = 1; i < 10; i++){
 		inverseApplyKey(Y, k, (ROUND--)*4);
-
-
-		std::cout<<std::endl;
-		for(int i = 0; i < 16; i++){
-			std::cout<<std::hex<<(int)Y[i]<<" | ";
-		}
-		exit(1);
 
 		inverseMixCol(Y);
 
@@ -559,6 +575,8 @@ unsigned char* AES::decrypt(unsigned char A[], unsigned char KEY[]){
 		for(int i = 0; i < 16; i++){
 			std::cout<<std::hex<<(int)Y[i]<<" | ";
 		}
+		std::cout<<std::endl;
+
 		exit(1);
 
 
