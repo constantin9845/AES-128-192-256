@@ -93,7 +93,10 @@ class AES{
         // In Mix colunm function
         static unsigned char GFmultiply(unsigned char b, unsigned char temp);
 
+        // helper function to perform repetitive left shift
         static unsigned char GFmultiply2(unsigned char b);
+
+        static unsigned char* randomKey();
 
 };
 

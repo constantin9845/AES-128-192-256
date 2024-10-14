@@ -179,17 +179,25 @@ void AES::inverseMixCol(unsigned char* B){
 	for(int i = 0; i < 4; i++){
 
 
-		unsigned char c0 = GFmultiply(temp[0][i],INVERSE_MIXCOL_MATRIX[0][0]) ^ GFmultiply(temp[1][i],INVERSE_MIXCOL_MATRIX[0][1]) ^ 
-		GFmultiply(temp[2][i],INVERSE_MIXCOL_MATRIX[0][2]) ^ GFmultiply(temp[3][i],INVERSE_MIXCOL_MATRIX[0][3]);
+		unsigned char c0 = 	GFmultiply(temp[0][i],INVERSE_MIXCOL_MATRIX[0][0]) ^ 
+							GFmultiply(temp[1][i],INVERSE_MIXCOL_MATRIX[0][1]) ^ 
+							GFmultiply(temp[2][i],INVERSE_MIXCOL_MATRIX[0][2]) ^ 
+							GFmultiply(temp[3][i],INVERSE_MIXCOL_MATRIX[0][3]);
 
-		unsigned char c1 = GFmultiply(temp[0][i],INVERSE_MIXCOL_MATRIX[1][0]) ^ GFmultiply(temp[1][i],INVERSE_MIXCOL_MATRIX[1][1]) ^ 
-		GFmultiply(temp[2][i],INVERSE_MIXCOL_MATRIX[1][2]) ^ GFmultiply(temp[3][i],INVERSE_MIXCOL_MATRIX[1][3]);
+		unsigned char c1 = 	GFmultiply(temp[0][i],INVERSE_MIXCOL_MATRIX[1][0]) ^ 
+							GFmultiply(temp[1][i],INVERSE_MIXCOL_MATRIX[1][1]) ^ 
+							GFmultiply(temp[2][i],INVERSE_MIXCOL_MATRIX[1][2]) ^ 
+							GFmultiply(temp[3][i],INVERSE_MIXCOL_MATRIX[1][3]);
 
-		unsigned char c2 = GFmultiply(temp[0][i],INVERSE_MIXCOL_MATRIX[2][0]) ^ GFmultiply(temp[1][i],INVERSE_MIXCOL_MATRIX[2][1]) ^ 
-		GFmultiply(temp[2][i],INVERSE_MIXCOL_MATRIX[2][2]) ^ GFmultiply(temp[3][i],INVERSE_MIXCOL_MATRIX[2][3]);
+		unsigned char c2 = 	GFmultiply(temp[0][i],INVERSE_MIXCOL_MATRIX[2][0]) ^ 
+							GFmultiply(temp[1][i],INVERSE_MIXCOL_MATRIX[2][1]) ^ 
+							GFmultiply(temp[2][i],INVERSE_MIXCOL_MATRIX[2][2]) ^ 
+							GFmultiply(temp[3][i],INVERSE_MIXCOL_MATRIX[2][3]);
 
-		unsigned char c3 = GFmultiply(temp[0][i],INVERSE_MIXCOL_MATRIX[3][0]) ^ GFmultiply(temp[1][i],INVERSE_MIXCOL_MATRIX[3][1]) ^ 
-		GFmultiply(temp[2][i],INVERSE_MIXCOL_MATRIX[3][2]) ^ GFmultiply(temp[3][i],INVERSE_MIXCOL_MATRIX[3][3]);
+		unsigned char c3 = 	GFmultiply(temp[0][i],INVERSE_MIXCOL_MATRIX[3][0]) ^ 
+							GFmultiply(temp[1][i],INVERSE_MIXCOL_MATRIX[3][1]) ^ 
+							GFmultiply(temp[2][i],INVERSE_MIXCOL_MATRIX[3][2]) ^ 
+							GFmultiply(temp[3][i],INVERSE_MIXCOL_MATRIX[3][3]);
 
 
 
@@ -545,6 +553,16 @@ unsigned char* AES::decrypt(unsigned char A[], unsigned char KEY[]){
 	k = nullptr;
 	
 	return Y;
+}
+
+unsigned char AES::stringToHex(char &a, char &b){
+	
+}
+
+unsigned char* AES::randomKey(){
+
+	// 22789a21e924d77f22affc07a0b8e7e1
+
 }
 
 
