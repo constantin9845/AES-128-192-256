@@ -1,6 +1,14 @@
 #include "AES.h"
 
 // byte substitution layer
+void AES::byteSub(unsigned char state[4][4]){
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < 4; j++){
+			state[i][j] = SBOX[(state[i][j])/16][(state[i][j])%16];
+		}
+	}
+}
+
 unsigned char AES::byteSub(unsigned char A){
 	return SBOX[A/16][A%16];
 }
@@ -10,258 +18,178 @@ unsigned char AES::inverseByteSub(unsigned char A){
 	return INV_SBOX[A/16][A%16];
 }
 
-// shift row layer
-void AES::shiftRow(unsigned char* B){
-	unsigned char temp[4][4];
-
-	int index = 0;
-	// fill matrix
+void AES::inverseByteSub(unsigned char state[4][4]){
 	for(int i = 0; i < 4; i++){
 		for(int j = 0; j < 4; j++){
-			temp[j][i] = B[index];
-			index++;
+			state[i][j] = INV_SBOX[(state[i][j])/16][(state[i][j])%16];
 		}
 	}
+}
 
-
-	//start shift rows
+// shift row layer
+void AES::shiftRow(unsigned char state[4][4]){
 
 	// row 2 shifted left by 1
-	unsigned char k = temp[1][0];
+	unsigned char k = state[1][0];
 	for(int j = 0; j < 3; j++){
-		temp[1][j] = temp[1][j+1];
+		state[1][j] = state[1][j+1];
 	}
-	temp[1][3] = k;
+	state[1][3] = k;
 
 
 	// row 3 shifted left by 2
-	unsigned char a = temp[2][0];
-	unsigned char b = temp[2][1];
+	unsigned char a = state[2][0];
+	unsigned char b = state[2][1];
 	for(int i = 0; i < 2; i++){
-		temp[2][i] = temp[2][i+2];
+		state[2][i] = state[2][i+2];
 	}
-	temp[2][2] = a; temp[2][3] = b;
+	state[2][2] = a; state[2][3] = b;
 
 
 	// row 4 shifted right by 1
-	unsigned char c = temp[3][3];
+	unsigned char c = state[3][3];
 	for(int i = 3; i > 0; i--){
-		temp[3][i] = temp[3][i-1];
+		state[3][i] = state[3][i-1];
 	}
-	temp[3][0] = c;
-
-
-	// store new order back into B
-	index = 0;
-	for(int i = 0; i < 4; i++){
-		for(int j = 0; j < 4; j++){
-			B[index] = temp[j][i]; 
-			index++;
-		}
-	}
+	state[3][0] = c;
 }
 
 // shift row layer
-void AES::inverseShiftRow(unsigned char* B){
-	unsigned char temp[4][4];
-
-	int index = 0;
-	// fill matrix
-	for(int i = 0; i < 4; i++){
-		for(int j = 0; j < 4; j++){
-			temp[j][i] = B[index];
-			index++;
-		}
-	}
-
-	//start shift rows
+void AES::inverseShiftRow(unsigned char state[4][4]){
 
 	// row 2 shifted right by 1
-	unsigned char k = temp[1][3];
+	unsigned char k = state[1][3];
 	for(int j = 3; j > 0; j--){
-		temp[1][j] = temp[1][j-1];
+		state[1][j] = state[1][j-1];
 	}
-	temp[1][0] = k;
+	state[1][0] = k;
 
 	// row 3 shifted right by 2
-	unsigned char a = temp[2][2];
-	unsigned char b = temp[2][3];
+	unsigned char a = state[2][2];
+	unsigned char b = state[2][3];
 
 	for(int j = 3; j > 1; j--){
-		temp[2][j] = temp[2][j-2];
+		state[2][j] = state[2][j-2];
 	}
-	temp[2][0] = a;
-	temp[2][1] = b;
+	state[2][0] = a;
+	state[2][1] = b;
 
 
 	// row 4 shifted left by 1
-	k = temp[3][0];
+	k = state[3][0];
 	for(int j = 0; j < 3; j++){
-		temp[3][j] = temp[3][j+1];
+		state[3][j] = state[3][j+1];
 	}
-	temp[3][3] = k;
+	state[3][3] = k;
 
-
-	// store new order back into B
-	index = 0;
-	for(int i = 0; i < 4; i++){
-		for(int j = 0; j < 4; j++){
-			B[index] = temp[j][i]; 
-			index++;
-		}
-	}
 }
 
 // Mix column layer
-void AES::mixCol(unsigned char* B){
-	unsigned char res[4][4];
-
-	// convert to col-major order
-	unsigned char temp[4][4];
-
-	int index = 0;
-	// fill matrix
-	for(int i = 0; i < 4; i++){
-		for(int j = 0; j < 4; j++){
-			temp[j][i] = B[index];
-			index++;
-		}
-	}
-
+void AES::mixCol(unsigned char state[4][4]){
 
 	for(int i = 0; i < 4; i++){
 
+		unsigned char c0 = 	GFmultiply(state[0][i],MIXCOL_MATRIX[0][0]) ^ 
+							GFmultiply(state[1][i],MIXCOL_MATRIX[0][1]) ^ 
+							GFmultiply(state[2][i],MIXCOL_MATRIX[0][2]) ^ 
+							GFmultiply(state[3][i],MIXCOL_MATRIX[0][3]);
 
-		unsigned char c0 = GFmultiply(temp[0][i],MIXCOL_MATRIX[0][0]) ^ GFmultiply(temp[1][i],MIXCOL_MATRIX[0][1]) ^ 
-		GFmultiply(temp[2][i],MIXCOL_MATRIX[0][2]) ^ GFmultiply(temp[3][i],MIXCOL_MATRIX[0][3]);
+		unsigned char c1 = 	GFmultiply(state[0][i],MIXCOL_MATRIX[1][0]) ^ 
+							GFmultiply(state[1][i],MIXCOL_MATRIX[1][1]) ^ 
+							GFmultiply(state[2][i],MIXCOL_MATRIX[1][2]) ^ 
+							GFmultiply(state[3][i],MIXCOL_MATRIX[1][3]);
 
-		unsigned char c1 = GFmultiply(temp[0][i],MIXCOL_MATRIX[1][0]) ^ GFmultiply(temp[1][i],MIXCOL_MATRIX[1][1]) ^ 
-		GFmultiply(temp[2][i],MIXCOL_MATRIX[1][2]) ^ GFmultiply(temp[3][i],MIXCOL_MATRIX[1][3]);
+		unsigned char c2 = 	GFmultiply(state[0][i],MIXCOL_MATRIX[2][0]) ^ 
+							GFmultiply(state[1][i],MIXCOL_MATRIX[2][1]) ^ 
+							GFmultiply(state[2][i],MIXCOL_MATRIX[2][2]) ^ 
+							GFmultiply(state[3][i],MIXCOL_MATRIX[2][3]);
 
-		unsigned char c2 = GFmultiply(temp[0][i],MIXCOL_MATRIX[2][0]) ^ GFmultiply(temp[1][i],MIXCOL_MATRIX[2][1]) ^ 
-		GFmultiply(temp[2][i],MIXCOL_MATRIX[2][2]) ^ GFmultiply(temp[3][i],MIXCOL_MATRIX[2][3]);
-
-		unsigned char c3 = GFmultiply(temp[0][i],MIXCOL_MATRIX[3][0]) ^ GFmultiply(temp[1][i],MIXCOL_MATRIX[3][1]) ^ 
-		GFmultiply(temp[2][i],MIXCOL_MATRIX[3][2]) ^ GFmultiply(temp[3][i],MIXCOL_MATRIX[3][3]);
-
+		unsigned char c3 = 	GFmultiply(state[0][i],MIXCOL_MATRIX[3][0]) ^ 
+							GFmultiply(state[1][i],MIXCOL_MATRIX[3][1]) ^ 
+							GFmultiply(state[2][i],MIXCOL_MATRIX[3][2]) ^ 
+							GFmultiply(state[3][i],MIXCOL_MATRIX[3][3]);
 
 
-		res[i][0] = c0; res[i][1] = c1; res[i][2] = c2; res[i][3] = c3;
+		state[0][i] = c0; state[1][i] = c1; state[2][i] = c2; state[3][i] = c3;
 	}
 
-	// store result back into B
-	index = 0;
-	for(int i = 0; i < 4; i++){
-		for(int j = 0; j < 4; j++){
-			B[index] = res[i][j]; 
-			index++;
-		}
-	}
 }
 
 // Inverse Mix column layer
-void AES::inverseMixCol(unsigned char* B){
-	unsigned char res[4][4];
-
-	// convert to col-major order
-	unsigned char temp[4][4];
-
-	int index = 0;
-	// fill matrix
-	for(int i = 0; i < 4; i++){
-		for(int j = 0; j < 4; j++){
-			temp[j][i] = B[index];
-			index++;
-		}
-	}
-
-
+void AES::inverseMixCol(unsigned char state[4][4]){
 	for(int i = 0; i < 4; i++){
 
+		unsigned char c0 = 	GFmultiply(state[0][i],INVERSE_MIXCOL_MATRIX[0][0]) ^ 
+							GFmultiply(state[1][i],INVERSE_MIXCOL_MATRIX[0][1]) ^ 
+							GFmultiply(state[2][i],INVERSE_MIXCOL_MATRIX[0][2]) ^ 
+							GFmultiply(state[3][i],INVERSE_MIXCOL_MATRIX[0][3]);
 
-		unsigned char c0 = 	GFmultiply(temp[0][i],INVERSE_MIXCOL_MATRIX[0][0]) ^ 
-							GFmultiply(temp[1][i],INVERSE_MIXCOL_MATRIX[0][1]) ^ 
-							GFmultiply(temp[2][i],INVERSE_MIXCOL_MATRIX[0][2]) ^ 
-							GFmultiply(temp[3][i],INVERSE_MIXCOL_MATRIX[0][3]);
+		unsigned char c1 = 	GFmultiply(state[0][i],INVERSE_MIXCOL_MATRIX[1][0]) ^ 
+							GFmultiply(state[1][i],INVERSE_MIXCOL_MATRIX[1][1]) ^ 
+							GFmultiply(state[2][i],INVERSE_MIXCOL_MATRIX[1][2]) ^ 
+							GFmultiply(state[3][i],INVERSE_MIXCOL_MATRIX[1][3]);
 
-		unsigned char c1 = 	GFmultiply(temp[0][i],INVERSE_MIXCOL_MATRIX[1][0]) ^ 
-							GFmultiply(temp[1][i],INVERSE_MIXCOL_MATRIX[1][1]) ^ 
-							GFmultiply(temp[2][i],INVERSE_MIXCOL_MATRIX[1][2]) ^ 
-							GFmultiply(temp[3][i],INVERSE_MIXCOL_MATRIX[1][3]);
+		unsigned char c2 = 	GFmultiply(state[0][i],INVERSE_MIXCOL_MATRIX[2][0]) ^ 
+							GFmultiply(state[1][i],INVERSE_MIXCOL_MATRIX[2][1]) ^ 
+							GFmultiply(state[2][i],INVERSE_MIXCOL_MATRIX[2][2]) ^ 
+							GFmultiply(state[3][i],INVERSE_MIXCOL_MATRIX[2][3]);
 
-		unsigned char c2 = 	GFmultiply(temp[0][i],INVERSE_MIXCOL_MATRIX[2][0]) ^ 
-							GFmultiply(temp[1][i],INVERSE_MIXCOL_MATRIX[2][1]) ^ 
-							GFmultiply(temp[2][i],INVERSE_MIXCOL_MATRIX[2][2]) ^ 
-							GFmultiply(temp[3][i],INVERSE_MIXCOL_MATRIX[2][3]);
-
-		unsigned char c3 = 	GFmultiply(temp[0][i],INVERSE_MIXCOL_MATRIX[3][0]) ^ 
-							GFmultiply(temp[1][i],INVERSE_MIXCOL_MATRIX[3][1]) ^ 
-							GFmultiply(temp[2][i],INVERSE_MIXCOL_MATRIX[3][2]) ^ 
-							GFmultiply(temp[3][i],INVERSE_MIXCOL_MATRIX[3][3]);
-
+		unsigned char c3 = 	GFmultiply(state[0][i],INVERSE_MIXCOL_MATRIX[3][0]) ^ 
+							GFmultiply(state[1][i],INVERSE_MIXCOL_MATRIX[3][1]) ^ 
+							GFmultiply(state[2][i],INVERSE_MIXCOL_MATRIX[3][2]) ^ 
+							GFmultiply(state[3][i],INVERSE_MIXCOL_MATRIX[3][3]);
 
 
-		res[i][0] = c0; res[i][1] = c1; res[i][2] = c2; res[i][3] = c3;
-	}
-
-	// store result back into B
-	index = 0;
-	for(int i = 0; i < 4; i++){
-		for(int j = 0; j < 4; j++){
-			B[index] = res[i][j]; 
-			index++;
-		}
+		state[0][i] = c0; state[1][i] = c1; state[2][i] = c2; state[3][i] = c3;
 	}
 }
 
 // Key addition layer
-void AES::applyKey(unsigned char* C, unsigned int* k, int& keyIndex){
+void AES::applyKey(unsigned char state[4][4], unsigned int* k, int& keyIndex){
 	// key element -> 4 bytes
 	// data elem -> 1 byte
 
 	// 16 bytes of input
-	for(int byte = 0; byte < 16; byte+=4){
+
+	for(int byte = 0; byte < 4; byte++){
 
 		// 1. grab 4 bytes and reformat into 32 bit variable
 		// 3. apply key
 		// 4. break down again into 4 bytes
 
-		unsigned int temp = (C[byte] << 24) ^ (C[byte+1] << 16) ^ (C[byte+2] << 8) ^ (C[byte+3]);
+		unsigned int temp = (state[0][byte] << 24) ^ (state[1][byte] << 16) ^ (state[2][byte] << 8) ^ (state[3][byte]);
 		temp ^= k[keyIndex++];
 
-		C[byte] = (temp >> 24) & 0xFF;
-		C[byte+1] = (temp >> 16) & 0xFF;
-		C[byte+2] = (temp >> 8) & 0xFF;
-		C[byte+3] = temp & 0xFF;
+		state[0][byte] = (temp >> 24) & 0xFF;
+		state[1][byte] = (temp >> 16) & 0xFF;
+		state[2][byte] = (temp >> 8) & 0xFF;
+		state[3][byte] = temp & 0xFF;
 
 	}
 }
 
 // Inverse Key addition layer
-void AES::inverseApplyKey(unsigned char* C, unsigned int* k, int keyIndex){
+void AES::inverseApplyKey(unsigned char state[4][4], unsigned int* k, int keyIndex){
 
 	// key element -> 4 bytes
 	// data elem -> 1 byte
 
 	int index = keyIndex;
 
-	// 16 bytes of input
-	for(int byte = 0; byte < 16; byte+=4){
+	for(int byte = 0; byte < 4; byte++){
 
 		// 1. grab 4 bytes and reformat into 32 bit variable
 		// 3. apply key
 		// 4. break down again into 4 bytes
 
-		unsigned int temp = (C[byte] << 24) ^ (C[byte+1] << 16) ^ (C[byte+2] << 8) ^ (C[byte+3]);
+		unsigned int temp = (state[0][byte] << 24) ^ (state[1][byte] << 16) ^ (state[2][byte] << 8) ^ (state[3][byte]);
 		temp ^= k[index++];
 
-		C[byte] = (temp >> 24) & 0xFF;
-		C[byte+1] = (temp >> 16) & 0xFF;
-		C[byte+2] = (temp >> 8) & 0xFF;
-		C[byte+3] = temp & 0xFF;
-
+		state[0][byte] = (temp >> 24) & 0xFF;
+		state[1][byte] = (temp >> 16) & 0xFF;
+		state[2][byte] = (temp >> 8) & 0xFF;
+		state[3][byte] = temp & 0xFF;
 	}
-
 }
 
 
@@ -445,23 +373,24 @@ unsigned char AES::GFmultiply(unsigned char b, unsigned char temp){
 	}
 }
 
-unsigned char* AES::encrypt(unsigned char input[], unsigned char KEY[]){
+void AES::encrypt(unsigned char input[], unsigned char out[], unsigned char KEY[]){
 
 	// stores ciphertext
-	unsigned char* Y = new unsigned char[16];
+	unsigned char state[4][4];
 
 	// Generate key schedule
 	unsigned int* k = genKey(KEY);
 	int keyIndex = 0;
 
-
-	for(int i = 0; i < 16; i++){
-		Y[i] = input[i];
+	// load state
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < 4; j++){
+			state[i][j] = input[i + 4 * j];
+		}
 	}
 
 	// Key whitening
-	applyKey(Y, k, keyIndex);
-
+	applyKey(state, k, keyIndex);
 
 	// perform round 1 to 9
 	for(int i = 0; i < 9; i++){
@@ -470,39 +399,40 @@ unsigned char* AES::encrypt(unsigned char input[], unsigned char KEY[]){
 		// start with bytesub layer
 		// call bytesub function for each byte
 
-		
-		for(int i = 0; i < 16; i++){
-			Y[i] = byteSub(Y[i]);
-		}
+		byteSub(state);
 		
 		// Shift row layer
 		// all 16 bytes are passed
-		shiftRow(Y);
+		shiftRow(state);
 
 		// Mix column layer
 		// all 16 bytes passed
-		mixCol(Y);
+		mixCol(state);
 
 		// perform key addition
-		applyKey(Y, k, keyIndex);
+		applyKey(state, k, keyIndex);
 	}
-
 
 	// perform round 10 without mixing columns
-	for(int i = 0; i < 16; i++){
-		Y[i] = byteSub(Y[i]);
-	}
+	byteSub(state);
 
-	shiftRow(Y);
-	applyKey(Y, k, keyIndex);
+	shiftRow(state);
+	applyKey(state, k, keyIndex);
 
 	delete[] k;
 	k = nullptr;
-	
-	return Y;
+
+	// store state in output
+	int index = 0;
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < 4; j++){
+			out[index++] = state[j][i];
+		}
+	}
 }
 
-unsigned char* AES::decrypt(unsigned char A[], unsigned char KEY[]){
+
+void AES::decrypt(unsigned char input[], unsigned char out[], unsigned char KEY[]){
 	/*
 	Structure
 	1. key addition
@@ -515,9 +445,13 @@ unsigned char* AES::decrypt(unsigned char A[], unsigned char KEY[]){
 
 	// stores plain text
 	unsigned char* Y = new unsigned char[16];
+	unsigned char state[4][4];
 
-	for(int i = 0; i < 16; i++){
-		Y[i] = A[i];
+	// load state
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < 4; j++){
+			state[i][j] = input[i + 4 * j];
+		}
 	}
 
 	// Generate key schedule
@@ -525,47 +459,46 @@ unsigned char* AES::decrypt(unsigned char A[], unsigned char KEY[]){
 
 
 	// Perform round 1 - without mix col layer
-	inverseApplyKey(Y, k, (ROUND--)*4);
+	inverseApplyKey(state, k, (ROUND--)*4);
 
-	for(int i = 0; i < 16; i++){
-		Y[i] = inverseByteSub(Y[i]);
-	}
+	inverseByteSub(state);
 
-	inverseShiftRow(Y);
+	inverseShiftRow(state);
 
 	// perform remaining rounds
 	for(int i = 1; i < 10; i++){
-		inverseApplyKey(Y, k, (ROUND--)*4);
+		inverseApplyKey(state, k, (ROUND--)*4);
 
-		inverseMixCol(Y);
+		inverseMixCol(state);
 
-		for(int i = 0; i < 16; i++){
-			Y[i] = inverseByteSub(Y[i]);
-		}
+		inverseByteSub(state);
 
-		inverseShiftRow(Y);
+		inverseShiftRow(state);
 		
 	}
 
-	inverseApplyKey(Y, k, (ROUND--)*4);
+	inverseApplyKey(state, k, (ROUND--)*4);
 
 	delete[] k;
 	k = nullptr;
-	
-	return Y;
+
+	// store state in output
+	int index = 0;
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < 4; j++){
+			out[index++] = state[j][i];
+		}
+	}
 }
 
+/*
 unsigned char AES::stringToHex(char &a, char &b){
-	
 }
 
 unsigned char* AES::randomKey(){
-
 	// 22789a21e924d77f22affc07a0b8e7e1
-
 }
-
-
+*/
 
 
 

@@ -6,11 +6,11 @@ class AES{
 
         // takes array 16 bytes of plain text / (text in hexadecimal)
         // takes a second array of same size that contains the key
-		static unsigned char* encrypt(unsigned char A[], unsigned char KEY[]);
+		static void encrypt(unsigned char input[], unsigned char out[], unsigned char KEY[]);
 
         // takes array of 16 bytes of ciphertext (in hexadecimal)
         // takes in 128 bit key
-        static unsigned char* decrypt(unsigned char A[], unsigned char KEY[]);
+        static void decrypt(unsigned char input[], unsigned char output[], unsigned char KEY[]);
 
 	private:
 
@@ -19,6 +19,8 @@ class AES{
             perform byte substitution by table lookup
             takes one byte
         */
+        static void byteSub(unsigned char state[4][4]);
+
         static unsigned char byteSub(unsigned char A);
 
         /*
@@ -28,19 +30,21 @@ class AES{
         */
         static unsigned char inverseByteSub(unsigned char A);
 
+        static void inverseByteSub(unsigned char state[4][4]);
+
         /*
             Layer 2
             perform row shift 
             takes all 16 bytes at once
         */
-        static void shiftRow(unsigned char* B);
+        static void shiftRow(unsigned char state[4][4]);
 
         /*
             Inverse ayer 2
             perform inverse row shift 
             takes all 16 bytes at once
         */
-        static void inverseShiftRow(unsigned char* B);
+        static void inverseShiftRow(unsigned char state[4][4]);
 
  
         /*
@@ -48,21 +52,21 @@ class AES{
             perform Mix column 
             takes all 16 bytes at once
         */
-        static void mixCol(unsigned char* B);
+        static void mixCol(unsigned char state[4][4]);
 
         /*
             Inverse Layer 3
             perform Inverse Mix column 
             takes all 16 bytes at once
         */
-        static void inverseMixCol(unsigned char* B);
+        static void inverseMixCol(unsigned char state[4][4]);
 
 
         /*
             Key addition layer
             XOR(add) data to key
         */
-        static void applyKey(unsigned char* C, unsigned int* k, int& keyIndex);
+        static void applyKey(unsigned char state[4][4], unsigned int* k, int& keyIndex);
 
 
         /*
@@ -70,7 +74,7 @@ class AES{
             XOR(add) data to key
             key index is decremented
         */
-        static void inverseApplyKey(unsigned char* C, unsigned int* k, int keyIndex);
+        static void inverseApplyKey(unsigned char state[4][4], unsigned int* k, int keyIndex);
 
 
         /*
@@ -96,7 +100,7 @@ class AES{
         // helper function to perform repetitive left shift
         static unsigned char GFmultiply2(unsigned char b);
 
-        static unsigned char* randomKey();
+        //static unsigned char* randomKey();
 
 };
 
