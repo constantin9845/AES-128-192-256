@@ -1,16 +1,29 @@
-#include <iostream>
+ #include <iostream>
 #include <bitset>
 
 class AES{
 	public:
 
-        // takes array 16 bytes of plain text / (text in hexadecimal)
+        // ECB Mode
+        // takes array of 16 bytes
         // takes a second array of same size that contains the key
 		static void encrypt(unsigned char input[], unsigned char out[], unsigned char KEY[]);
 
-        // takes array of 16 bytes of ciphertext (in hexadecimal)
+
+        // CBC Mode
+        // takes array of 16 bytes
+        // takes a second array of same size that contains the key
+        static void encryptCBC(unsigned char input[], unsigned char out[], unsigned char KEY[], unsigned char IV[]);
+
+
+        // takes array of 16 bytes
         // takes in 128 bit key
         static void decrypt(unsigned char input[], unsigned char output[], unsigned char KEY[]);
+
+        // CBC Mode
+        // takes array of 16 bytes
+        // takes in 128 bit key
+        static void decryptCBC(unsigned char input[], unsigned char out[], unsigned char KEY[], unsigned char IV[]);
 
 	private:
 
@@ -100,7 +113,6 @@ class AES{
         // helper function to perform repetitive left shift
         static unsigned char GFmultiply2(unsigned char b);
 
-        //static unsigned char* randomKey();
 
 };
 
