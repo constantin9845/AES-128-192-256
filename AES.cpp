@@ -270,7 +270,6 @@ unsigned int* AES::genKey256(unsigned char K[]){
 	// key expansion
 	for(int i = 8; i < 60; i++){
 		if(i % 8 == 0){
-			std::cout<<(int)gConst<<" ";
 			W[i] = W[i-8] ^ g(W[i-1], gConst);
 		}
 		else if(i == 4 || i == 12 || i == 20 || i == 28){
@@ -545,28 +544,16 @@ void AES::encrypt(unsigned char input[], unsigned char out[], unsigned char KEY[
 		applyKey(state, k, keyIndex);
 	}
 	else if(keySize == 256){
-		// perform round 1 to 14
-		for(int i = 0; i < 14; i++){
-
-
-			// start with bytesub layer
-			// call bytesub function for each byte
+		// perform round 1 to 13
+		for(int i = 0; i < 13; i++){
 
 			byteSub(state);
-			
-			// Shift row layer
-			// all 16 bytes are passed
 			shiftRow(state);
-
-			// Mix column layer
-			// all 16 bytes passed
 			mixCol(state);
-
-			// perform key addition
 			applyKey(state, k, keyIndex);
 		}
 
-		// perform round 15 without mixing columns
+		// perform round 14 without mixing columns
 		byteSub(state);
 
 		shiftRow(state);
@@ -611,7 +598,7 @@ void AES::decrypt(unsigned char input[], unsigned char out[], unsigned char KEY[
 			break;
 		case 256:
 			k = genKey256(KEY);
-			ROUND = 15;
+			ROUND = 14;
 			break;
 	}
 
@@ -665,7 +652,7 @@ void AES::decrypt(unsigned char input[], unsigned char out[], unsigned char KEY[
 	}
 	else if(keySize == 256){
 		// perform remaining rounds
-		for(int i = 1; i < 15; i++){
+		for(int i = 1; i < 14; i++){
 			inverseApplyKey(state, k, (ROUND--)*4);
 
 			inverseMixCol(state);
@@ -774,8 +761,8 @@ void AES::encryptCBC(unsigned char input[], unsigned char out[], unsigned char K
 		applyKey(state, k, keyIndex);
 	}
 	else if(keySize == 256){
-		// perform ROUNDS 2 to 14
-		for(int i = 1; i < 14; i++){
+		// perform ROUNDS 2 to 13
+		for(int i = 1; i < 13; i++){
 
 			byteSub(state);
 			shiftRow(state);
@@ -783,7 +770,7 @@ void AES::encryptCBC(unsigned char input[], unsigned char out[], unsigned char K
 			applyKey(state, k, keyIndex);
 		}
 
-		// perform round 15 without mixing columns
+		// perform round 14 without mixing columns
 		byteSub(state);
 
 		shiftRow(state);
@@ -830,7 +817,7 @@ void AES::decryptCBC(unsigned char input[], unsigned char out[], unsigned char K
 			break;
 		case 256:
 			k = genKey256(KEY);
-			ROUND = 15;
+			ROUND = 14;
 			break;
 	}
 
@@ -871,7 +858,7 @@ void AES::decryptCBC(unsigned char input[], unsigned char out[], unsigned char K
 	}
 	else if(keySize == 256){
 		// perform remaining rounds
-		for(int i = 1; i < 15; i++){
+		for(int i = 1; i < 14; i++){
 			inverseApplyKey(state, k, (ROUND--)*4);
 			inverseMixCol(state);
 			inverseByteSub(state);
