@@ -7,7 +7,7 @@ A C++ library to perform encryption/decryption using AES.
 - Available modes are ECB and CBC
 
 ## Usage
-ECB Mode
+ECB Mode + 128 bit key
 ```cpp
 #include "AES.h"
 
@@ -32,7 +32,7 @@ AES::encrypt(input,output,key);
 AES::decrypt(output, input, key);
 ```
 
-CBC Mode
+CBC Mode + 256 bit key
 ```cpp
 #include "AES.h"
 
@@ -43,7 +43,11 @@ unsigned char input[] = {
 		0xb3, 0xd5, 0x6c, 0x24
 };
 
-unsigned char key[16] = {
+unsigned char key[32] = {
+		0x88, 0x09, 0xe7, 0xdd,
+		0x3a, 0x95, 0x9e, 0xe5,
+		0xd8, 0xdb, 0xb1, 0x3f,
+		0x50, 0x1f, 0x22, 0x74,
 		0x88, 0x09, 0xe7, 0xdd,
 		0x3a, 0x95, 0x9e, 0xe5,
 		0xd8, 0xdb, 0xb1, 0x3f,
@@ -65,13 +69,7 @@ AES::decryptCBC(output, input, key, IV);
 ```
 
 
-#### To do
-- Optimize functions
-- implement other key length variants 
-
-
 #### non priority:
 - implement galois multiplication for bytesub instead of table look up.
-- add key generator dev/urandom/
 - test script
 
